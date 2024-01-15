@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="exud3ud4.css">
+    <script src="exud3ud4.js"></script>
+    <title>Examen UD 3 </title>
+</head>
+<body>
+    <header>
+            <fieldset>
+                <legend> Inicio de sesión</legend>
+                <span id="datosLogin">
+                    Username: <input type="text" name="username" id="username"/>
+                    Password: <input type="password" name="password" id="contraseña"/>
+                </span>
+                <span id="mensajesLogin"></span>
+                </br>
+                <button id="btnIniciarSesion">Iniciar Sesión</button>
+                <button id="btnUsuarioNuevo">Usuario Nuevo</button>
+                <button class="oculto" id="btnCerrarSesion">Cerrar Sesion</button>
+                
+            </fieldset>
+    </header>
+    
+    <main>
+        <fieldset id="datosLector" class="oculto" ><legend>Datos Lector</legend>
+            <form id="registroForm" >
+            Nombre Lector (*): <input type ="text" id="nombreLector"/><span class="resaltado" id="errorNombre"></span>
+            Apellidos Lector (*): <input type="text"id="apellidosLector"/><span class="resaltado" id="errorApellidos"></span>
+            Nombre Usuario (*): <input type="text" id="nombreUsuario"><span class="resaltado" id="errorNombreUsuario"></span>
+            Password (*): <input type="password" id="password"><span class="resaltado" id="errorPassword"></span>
+            Repetir Password (*): <input type="password" id="repetirPassword"><span class="resaltado" id="errorRepetirPassword"></span>
+            Email: <input type="text" id="email"><span class="resaltado" id="errorEmail"></span>
+            Acepto las condiciones del servicio: <input type="checkbox"  class="resaltado" id="condiciones"/><span id="errorCondiciones" class="resaltado"></span>
+            Deseas recibir novedades: <input type="checkbox"  id="news"/>
+            <button id="btnRegistrarUsuario">Registrar usuario</button><span class="resaltado" id="errorRegistro"></span>
+            </form>
+        </fieldset>
+        <fieldset >
+            <legend class="datosLibros">Libros en prestamo</legend>
+            <!-- Aqui cargar los libros que tiene el usuario en prestamo -->
+            <ul id="librosPrestados"></ul>
+        </fieldset>
+        <fieldset class="datosLibros">
+            <legend>Libros disponibles</legend>
+            <!-- Aqui cargar los libros disponibles para prestamo -->
+            <ul id="librosDisponibles"></ul>
+        </fieldset>
+    </main>
+</body>
+</html>

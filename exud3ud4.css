@@ -1,0 +1,16 @@
+*{
+    margin: 1px;
+    font-family: roboto,sans-serif;
+}
+
+
+
+#datosLector *{
+    display:block;
+}
+.oculto {
+    display: none;
+}
+.resaltado{
+    color:red;
+}
