@@ -1,4 +1,4 @@
-const URL_SERVER='http://54.175.234.31:3000/';
+const URL_SERVER='http://44.222.202.102:3000/';
 
 document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('btnUsuarioNuevo').addEventListener('click', mostrarRegistro);
@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     // document.getElementById('condiciones').addEventListener('blur',validarCondiciones);
     document.getElementById('btnRegistrarUsuario').addEventListener('click',validarFormulario);
     document.getElementById('btnIniciarSesion').addEventListener('click',login);
+    document.getElementById('btnCerrarSesion').addEventListener('click',logOut);
+    
 })
 
 
@@ -238,6 +240,162 @@ function rellenarLogin(){
 }
 
 
+
+
+async function login(){
+    const username = document.getElementById('username').value;
+    const contraseña = document.getElementById('contraseña').value;
+    const span = document.getElementById("mensajesLogin");
+
+    let response = await fetch(URL_SERVER+`usuarios?usuario=${username}&&password=${contraseña}`);
+    if(response.ok){
+        let usuario = await response.json();
+        if(usuario.length > 0){
+            console.log(usuario);
+            if(contraseña ===  usuario[0]["password"]){
+                guardarSesion(usuario);
+                ocultarLogin();
+                span.classList.remove('resaltado');
+                span.innerHTML=`<h2>Bienvenido, ${username}</h2>`;
+                obtenerLibrosDisponiblesprueba();
+                obtenerLibrosPrestados(usuario[0]["id"]);
+            } else {
+                span.classList.add('resaltado');
+                span.innerText='datos incorrectos';
+            }
+        } else {
+            span.classList.add('resaltado');
+            span.innerText='datos incorrectos';
+        }
+    } else {
+        console.error('código de error: ', response.status);
+    }
+}
+
+
+function ocultarLogin(){
+    document.getElementById('datosLogin').classList.add('oculto');
+    document.getElementById('btnIniciarSesion').classList.add('oculto');
+    document.getElementById('btnUsuarioNuevo').classList.add('oculto');
+    document.getElementById('btnCerrarSesion').classList.remove('oculto');
+}
+
+
+function guardarSesion(usuario){
+    sessionStorage.setItem('sesionIniciada', JSON.stringify(usuario));
+}
+
+
+
+
+function logOut(e){
+    sessionStorage.removeItem('sesionIniciada');
+    document.getElementById('librosDisponibles').classList.add('oculto');
+    document.getElementById('librosPrestados').classList.add('oculto');
+    
+    document.getElementById('datosLogin').classList.remove('oculto');
+    document.getElementById('datosLogin').reset();
+    document.getElementById('mensajesLogin').innerText='';
+    document.getElementById('btnCerrarSesion').classList.add('oculto');
+    document.getElementById('btnIniciarSesion').classList.remove('oculto');
+    document.getElementById('btnUsuarioNuevo').classList.remove('oculto');
+}
+
+async function obtenerLibrosDisponiblesprueba(e){
+    const lista = document.getElementById('librosDisponibles');
+    
+    let response = await fetch(URL_SERVER+`libros?id_prestamo=0`);
+    if(response.ok){
+        let libros = await response.json();
+        if(libros.length > 0){
+            
+            libros.forEach((libro)=>{
+                const ol = document.createElement('ol');
+                const btnPrestar = document.createElement('button');
+                btnPrestar.id='btnPrestar';
+                btnPrestar.innerText='Prestar';
+                btnPrestar.addEventListener('click',prestar);
+                ol.append(`${libro["titulo"]}, ${libro["autor"]}, Fecha de devolución: ${libro["fecha_devolucion"]}`);
+                ol.append(btnPrestar);
+                lista.append(ol);
+            })
+
+        } else{
+            console.error('libros no encontrados')
+        }
+    } else {
+        console.error('código de error: ', response.status);
+    }
+}
+
+
+async function obtenerLibrosPrestados(id){
+    const lista = document.getElementById('librosPrestados');
+    
+    let response = await fetch(URL_SERVER+`libros?id_prestamo=${id}`);
+    if(response.ok){
+        let libros = await response.json();
+        if(libros.length > 0){
+            
+            libros.forEach((libro) => {
+                const ol = document.createElement("ol");
+                const btnDevolver = document.createElement("button");
+                btnDevolver.id = "btnDevolver";
+                btnDevolver.innerText = "Devolver";
+                btnDevolver.addEventListener('click',function(){
+                    devolver(libro["id"]);
+                });
+                ol.append(
+                    `${libro["titulo"]}, ${libro["autor"]}, Fecha de devolución: ${libro["fecha_devolucion"]}`
+                );
+                ol.append(btnDevolver);
+                lista.append(ol);
+            })
+            
+        } else{
+            console.error('libros no encontrados')
+        }
+    } else {
+        console.error('código de error: ', response.status);
+    }
+}
+
+
+//sin terminar
+async function devolver(idlibro) {
+  let response = await fetch(URL_SERVER + `libros?id=${idlibro}`);
+  if (response.ok) {
+    
+    const libro = response.json();
+    const librodevuelto = {
+      titulo: libro["titulo"],
+      autor: libro["autor"],
+      id_prestamo: 0,
+      fecha_devolucion: "",
+    };
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json;charset=utf-8",
+      },
+      body: JSON.stringify(librodevuelto),
+    };
+    console.log(libro);
+
+    let response = await fetch(URL_SERVER + `libros?id=${idlibro}`, options);
+    if (response.ok) {
+      let libro = response.json();
+      console.log(libro);
+    } else {
+      console.error("error");
+    }
+  } else {
+    console.error("error");
+  }
+}
+
+
+
 // async function logIn(e) {
 //     const username = document.getElementById("username").value;
 //     const contraseña = document.getElementById("contraseña").value;
@@ -261,81 +419,18 @@ function rellenarLogin(){
 //     }
 // }
 
-async function login(){
-    const username = document.getElementById('username').value;
-    const contraseña = document.getElementById('contraseña').value;
-    const span = document.getElementById("mensajesLogin");
+// async function obtenerLibrosDisponibles() {
+//     const listalibros = document.getElementById('librosDisponibles');
+//     try {
+//         let response = await fetch(URL_SERVER + `libros?id_prestamo=0`);
+//         if (response.ok) {
+//             let libros = response.json();
+//             console.log(libros[0]["titulo"]);
+//         } else {
+//             console.error('código de error:', response.status)
+//         }
+//     } catch (error) {
+//         console.error('error de peticion');
+//     }
 
-    let response = await fetch(URL_SERVER+`usuarios?usuario=${username}&&password=${contraseña}`);
-    if(response.ok){
-        let usuario = await response.json();
-        if(usuario.length > 0){
-            console.log(usuario[0]["usuario"],usuario[0]["password"]);
-            if(contraseña ===  usuario[0]["password"]){
-                guardarSesion(usuario);
-                ocultarLogin();
-                span.innerHTML=`<h2>Bienvenido, ${username}</h2>`;
-                obtenerLibrosDisponiblesprueba();
-            } else {
-                span.innerText='datos incorrectos';
-            }
-        } else {
-            span.innerText='datos incorrectos';
-        }
-    } else {
-        console.error('código de error: ', response.status);
-    }
-}
-
-
-function ocultarLogin(){
-    document.getElementById('datosLogin').classList.add('oculto');
-    document.getElementById('btnIniciarSesion').classList.add('oculto');
-    document.getElementById('btnUsuarioNuevo').classList.add('oculto');
-    document.getElementById('btnCerrarSesion').classList.remove('oculto');
-}
-
-
-function guardarSesion(usuario){
-    sessionStorage.setItem('sesionIniciada', JSON.stringify(usuario));
-}
-
-
-async function obtenerLibrosDisponibles() {
-    const listalibros = document.getElementById('librosDisponibles');
-    try {
-        let response = await fetch(URL_SERVER + `libros?id_prestamo=0`);
-        if (response.ok) {
-            let libros = response.json();
-            console.log(libros[0]["titulo"]);
-        } else {
-            console.error('código de error:', response.status)
-        }
-    } catch (error) {
-        console.error('error de peticion');
-    }
-
-}
-
-async function obtenerLibrosDisponiblesprueba(e){
-    const lista = document.getElementById('librosDisponibles');
-    const ols = document.createElement('ol');
-    
-    let response = await fetch(URL_SERVER+`libros?id_prestamo=0`);
-    if(response.ok){
-        let libros = await response.json();
-        if(libros.length > 0){
-            console.log(libros[0]["titulo"]);
-            libros.forEach(libro => {
-                lista.append(`<ol>${libro["titulo"]}</ol>`);
-            });
-        } else{
-            console.error('libros no encontrados')
-        }
-    } else {
-        console.error('código de error: ', response.status);
-    }
-}
-
-
-
+// }
